@@ -1,4 +1,4 @@
-## AUG-1_JAVA
+#JAVA_CODE
 
 class Solution {
     public static long ncr (int n , int r){
