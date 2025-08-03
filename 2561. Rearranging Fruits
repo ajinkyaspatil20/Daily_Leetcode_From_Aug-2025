@@ -1,0 +1,62 @@
+import java.util.*;
+
+public class Solution {
+    public long minCost(int[] basket1, int[] basket2) {
+        Map<Integer, Integer> counter1 = new HashMap<>();
+        Map<Integer, Integer> counter2 = new HashMap<>();
+        Map<Integer, Integer> totalCounter = new HashMap<>();
+
+        // Count frequency of elements in both baskets
+        for (int fruit : basket1) {
+            counter1.put(fruit, counter1.getOrDefault(fruit, 0) + 1);
+            totalCounter.put(fruit, totalCounter.getOrDefault(fruit, 0) + 1);
+        }
+        for (int fruit : basket2) {
+            counter2.put(fruit, counter2.getOrDefault(fruit, 0) + 1);
+            totalCounter.put(fruit, totalCounter.getOrDefault(fruit, 0) + 1);
+        }
+
+       
+        for (int fruit : totalCounter.keySet()) {
+            if (totalCounter.get(fruit) % 2 != 0) {
+                return -1;
+            }
+        }
+
+       
+        List<Integer> surplusA = new ArrayList<>();
+        List<Integer> surplusB = new ArrayList<>();
+
+        for (int fruit : totalCounter.keySet()) {
+            int diff = counter1.getOrDefault(fruit, 0) - counter2.getOrDefault(fruit, 0);
+            if (diff > 0) {
+                for (int i = 0; i < diff / 2; i++) {
+                    surplusA.add(fruit);
+                }
+            } else if (diff < 0) {
+                for (int i = 0; i < -diff / 2; i++) {
+                    surplusB.add(fruit);
+                }
+            }
+        }
+
+        
+        Collections.sort(surplusA);
+        Collections.sort(surplusB, Collections.reverseOrder());
+
+        
+        int minFruit = Integer.MAX_VALUE;
+        for (int fruit : basket1) minFruit = Math.min(minFruit, fruit);
+        for (int fruit : basket2) minFruit = Math.min(minFruit, fruit);
+
+        
+        long cost = 0;
+        for (int i = 0; i < surplusA.size(); i++) {
+            int a = surplusA.get(i);
+            int b = surplusB.get(i);
+            cost += Math.min(Math.min(a, b), 2 * minFruit);
+        }
+
+        return cost;
+    }
+}
