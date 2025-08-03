@@ -1,0 +1,35 @@
+class Solution {
+    
+    public static int helper(int left, int right, int startPos) {
+        if (right < startPos) {
+            return startPos - left;
+        }
+        if (left > startPos) {
+            return right - startPos;
+        }
+        return right - left + Math.min(right - startPos, startPos - left);
+    }
+
+    public int maxTotalFruits(int[][] fruits, int startPos, int k) {
+        int n = fruits.length;
+        int left = 0;
+        int right = 0;
+        int currFruits = 0;
+        int maxFruits = 0;
+
+        while (right < n) {
+            currFruits += fruits[right][1];
+
+            
+            while (left <= right && helper(fruits[left][0], fruits[right][0], startPos) > k) {
+                currFruits -= fruits[left][1];
+                left++;
+            }
+
+            maxFruits = Math.max(maxFruits, currFruits);
+            right++;
+        }
+
+        return maxFruits;
+    }
+}
