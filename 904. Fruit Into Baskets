@@ -1,0 +1,26 @@
+import java.util.*;
+
+class Solution {
+    public int totalFruit(int[] fruits) {
+        Map<Integer, Integer> map = new HashMap<>();
+        int left = 0, maxFruits = 0;
+        for (int right = 0; right < fruits.length; right++) {
+            // Add fruit at the right pointer to the map
+            map.put(fruits[right], map.getOrDefault(fruits[right], 0) + 1);
+
+            // If we have more than 2 types, shrink the window from the left
+            while (map.size() > 2) {
+                map.put(fruits[left], map.get(fruits[left]) - 1);
+                if (map.get(fruits[left]) == 0) {
+                    map.remove(fruits[left]);
+                }
+                left++; // Move left pointer
+            }
+
+            // Update maximum number of fruits collected
+            maxFruits = Math.max(maxFruits, right - left + 1);
+        }
+
+        return maxFruits;
+    }
+}
