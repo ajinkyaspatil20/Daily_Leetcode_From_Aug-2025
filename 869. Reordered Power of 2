@@ -1,0 +1,23 @@
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Arrays;
+
+class Solution {
+    public boolean reorderedPowerOf2(int n) {
+        String sortedN = sortDigits(n);
+        
+        Set<String> powerOf2Signatures = new HashSet<>();
+        for (int i = 0; i < 31; i++) { // 2^0 to 2^30
+            int power = 1 << i;
+            powerOf2Signatures.add(sortDigits(power));
+        }
+        
+        return powerOf2Signatures.contains(sortedN);
+    }
+
+    private String sortDigits(int num) {
+        char[] arr = String.valueOf(num).toCharArray();
+        Arrays.sort(arr);
+        return new String(arr);
+    }
+}
