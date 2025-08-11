@@ -1,0 +1,48 @@
+class Solution {
+    static final long MOD = 1_000_000_007;
+
+    public int[] productQueries(int n, int[][] queries) {
+        // Step 1: Extract powers array
+        List<Long> powers = new ArrayList<>();
+        for (int i = 0; i < 32; i++) {
+            if ((n & (1 << i)) != 0) {
+                powers.add(1L << i);
+            }
+        }
+
+        // Step 2: Build prefix product array
+        int m = powers.size();
+        long[] prefix = new long[m];
+        prefix[0] = powers.get(0) % MOD;
+        for (int i = 1; i < m; i++) {
+            prefix[i] = (prefix[i - 1] * powers.get(i)) % MOD;
+        }
+
+        // Step 3: Answer queries
+        int[] ans = new int[queries.length];
+        for (int i = 0; i < queries.length; i++) {
+            int l = queries[i][0], r = queries[i][1];
+            if (l == 0) {
+                ans[i] = (int) prefix[r];
+            } else {
+                long inv = modPow(prefix[l - 1], MOD - 2); // modular inverse
+                ans[i] = (int) ((prefix[r] * inv) % MOD);
+            }
+        }
+
+        return ans;
+    }
+
+    // Fast exponentiation for modular inverse
+    private long modPow(long base, long exp) {
+        long result = 1;
+        while (exp > 0) {
+            if ((exp & 1) == 1) {
+                result = (result * base) % MOD;
+            }
+            base = (base * base) % MOD;
+            exp >>= 1;
+        }
+        return result;
+    }
+}
