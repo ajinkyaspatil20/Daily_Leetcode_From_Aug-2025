@@ -1,0 +1,20 @@
+class Solution {
+    public int maximum69Number(int num) {
+        int temp = num;
+        int place = 1;
+        int change = 0;
+
+        // Find the leftmost '6'
+        while (temp > 0) {
+            int digit = temp % 10;
+            if (digit == 6) {
+                change = place; // store the place value of the first 6 from right
+            }
+            temp /= 10;
+            place *= 10;
+        }
+
+        // If there was a 6, add the difference to make it 9
+        return num + change * 3; // 9 - 6 = 3
+    }
+}
