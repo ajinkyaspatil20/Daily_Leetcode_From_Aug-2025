@@ -1,0 +1,57 @@
+import java.util.*;
+
+class Solution {
+    private static final double EPSILON = 1e-6;
+    private static final double TARGET = 24.0;
+
+    public boolean judgePoint24(int[] cards) {
+        List<Double> nums = new ArrayList<>();
+        for (int c : cards) nums.add((double) c);
+        return dfs(nums);
+    }
+
+    private boolean dfs(List<Double> nums) {
+        if (nums.size() == 1) {
+            return Math.abs(nums.get(0) - TARGET) < EPSILON;
+        }
+
+        int n = nums.size();
+
+        // only pick pairs with i < j
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+
+                List<Double> next = new ArrayList<>();
+                for (int k = 0; k < n; k++) {
+                    if (k != i && k != j) next.add(nums.get(k));
+                }
+
+                double a = nums.get(i), b = nums.get(j);
+
+                
+                double[] results = {
+                    a + b,
+                    a - b,
+                    b - a,
+                    a * b
+                };
+                for (double val : results) {
+                    next.add(val);
+                    if (dfs(next)) return true;
+                    next.remove(next.size() - 1);
+                }
+                if (Math.abs(b) > EPSILON) {
+                    next.add(a / b);
+                    if (dfs(next)) return true;
+                    next.remove(next.size() - 1);
+                }
+                if (Math.abs(a) > EPSILON) {
+                    next.add(b / a);
+                    if (dfs(next)) return true;
+                    next.remove(next.size() - 1);
+                }
+            }
+        }
+        return false;
+    }
+}
