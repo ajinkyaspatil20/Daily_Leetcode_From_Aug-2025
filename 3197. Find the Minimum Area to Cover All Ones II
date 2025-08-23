@@ -1,0 +1,104 @@
+import java.util.*;
+
+class Solution {
+    int m, n;
+    int[][] grid;
+    
+    public int minimumSum(int[][] grid) {
+        this.grid = grid;
+        m = grid.length;
+        n = grid[0].length;
+        
+        int ans = Integer.MAX_VALUE;
+        
+        // case 1: 3 vertical strips
+        for (int c1 = 0; c1 < n; c1++) {
+            for (int c2 = c1 + 1; c2 < n; c2++) {
+                int area1 = boundingBox(0, 0, m - 1, c1);
+                int area2 = boundingBox(0, c1 + 1, m - 1, c2);
+                int area3 = boundingBox(0, c2 + 1, m - 1, n - 1);
+                if (area1 > 0 && area2 > 0 && area3 > 0) {
+                    ans = Math.min(ans, area1 + area2 + area3);
+                }
+            }
+        }
+        
+        // case 2: 3 horizontal strips
+        for (int r1 = 0; r1 < m; r1++) {
+            for (int r2 = r1 + 1; r2 < m; r2++) {
+                int area1 = boundingBox(0, 0, r1, n - 1);
+                int area2 = boundingBox(r1 + 1, 0, r2, n - 1);
+                int area3 = boundingBox(r2 + 1, 0, m - 1, n - 1);
+                if (area1 > 0 && area2 > 0 && area3 > 0) {
+                    ans = Math.min(ans, area1 + area2 + area3);
+                }
+            }
+        }
+        
+        // case 3: "┬" or "┴" (horizontal + 2 verticals)
+        for (int r = 0; r < m - 1; r++) {
+            for (int c = 0; c < n - 1; c++) {
+                // top + bottom split into left/right
+                int area1 = boundingBox(0, 0, r, n - 1);
+                int area2 = boundingBox(r + 1, 0, m - 1, c);
+                int area3 = boundingBox(r + 1, c + 1, m - 1, n - 1);
+                if (area1 > 0 && area2 > 0 && area3 > 0) {
+                    ans = Math.min(ans, area1 + area2 + area3);
+                }
+                
+                // bottom + top split into left/right
+                area1 = boundingBox(r + 1, 0, m - 1, n - 1);
+                area2 = boundingBox(0, 0, r, c);
+                area3 = boundingBox(0, c + 1, r, n - 1);
+                if (area1 > 0 && area2 > 0 && area3 > 0) {
+                    ans = Math.min(ans, area1 + area2 + area3);
+                }
+            }
+        }
+        
+        // case 4: "├" or "┤" (vertical + 2 horizontals)
+        for (int c = 0; c < n - 1; c++) {
+            for (int r = 0; r < m - 1; r++) {
+                // left + right split into top/bottom
+                int area1 = boundingBox(0, 0, m - 1, c);
+                int area2 = boundingBox(0, c + 1, r, n - 1);
+                int area3 = boundingBox(r + 1, c + 1, m - 1, n - 1);
+                if (area1 > 0 && area2 > 0 && area3 > 0) {
+                    ans = Math.min(ans, area1 + area2 + area3);
+                }
+                
+                // right + left split into top/bottom
+                area1 = boundingBox(0, c + 1, m - 1, n - 1);
+                area2 = boundingBox(0, 0, r, c);
+                area3 = boundingBox(r + 1, 0, m - 1, c);
+                if (area1 > 0 && area2 > 0 && area3 > 0) {
+                    ans = Math.min(ans, area1 + area2 + area3);
+                }
+            }
+        }
+        
+        return ans;
+    }
+    
+    // compute bounding box area of 1’s inside subgrid [r1..r2][c1..c2]
+    private int boundingBox(int r1, int c1, int r2, int c2) {
+        int minR = Integer.MAX_VALUE, maxR = Integer.MIN_VALUE;
+        int minC = Integer.MAX_VALUE, maxC = Integer.MIN_VALUE;
+        boolean has = false;
+        
+        for (int i = r1; i <= r2; i++) {
+            for (int j = c1; j <= c2; j++) {
+                if (grid[i][j] == 1) {
+                    has = true;
+                    minR = Math.min(minR, i);
+                    maxR = Math.max(maxR, i);
+                    minC = Math.min(minC, j);
+                    maxC = Math.max(maxC, j);
+                }
+            }
+        }
+        
+        if (!has) return 0;
+        return (maxR - minR + 1) * (maxC - minC + 1);
+    }
+}
