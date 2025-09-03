@@ -1,0 +1,81 @@
+import java.util.*;
+
+public class Solution {
+    public int numberOfPairs(int[][] points) {
+        int n = points.length;
+
+        // Step 1: coordinate compression
+        int[] xs = new int[n];
+        int[] ys = new int[n];
+        for (int i = 0; i < n; i++) {
+            xs[i] = points[i][0];
+            ys[i] = points[i][1];
+        }
+        int[] compX = compress(xs);
+        int[] compY = compress(ys);
+
+        // Step 2: fill grid
+        int maxX = Arrays.stream(compX).max().getAsInt() + 2;
+        int maxY = Arrays.stream(compY).max().getAsInt() + 2;
+        int[][] grid = new int[maxX][maxY];
+        for (int i = 0; i < n; i++) {
+            grid[compX[i]][compY[i]] = 1;
+        }
+
+        // Step 3: build 2D prefix sum
+        int[][] pref = new int[maxX][maxY];
+        for (int i = 0; i < maxX; i++) {
+            for (int j = 0; j < maxY; j++) {
+                pref[i][j] = grid[i][j];
+                if (i > 0) pref[i][j] += pref[i-1][j];
+                if (j > 0) pref[i][j] += pref[i][j-1];
+                if (i > 0 && j > 0) pref[i][j] -= pref[i-1][j-1];
+            }
+        }
+
+        // Step 4: check each pair
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i == j) continue;
+                int x1 = compX[i], y1 = compY[i]; // Alice
+                int x2 = compX[j], y2 = compY[j]; // Bob
+
+                if (xs[i] <= xs[j] && ys[i] >= ys[j]) { // valid upper-left to lower-right
+                    int inside = rectSum(pref, x1, y2, x2, y1);
+                    if (inside == 2) ans++;
+                }
+            }
+        }
+
+        return ans;
+    }
+
+    // helper: 2D prefix sum query
+    private int rectSum(int[][] pref, int x1, int y1, int x2, int y2) {
+        int res = pref[x2][y2];
+        if (x1 > 0) res -= pref[x1-1][y2];
+        if (y1 > 0) res -= pref[x2][y1-1];
+        if (x1 > 0 && y1 > 0) res += pref[x1-1][y1-1];
+        return res;
+    }
+
+    // helper: coordinate compression
+    private int[] compress(int[] arr) {
+        int n = arr.length;
+        int[] sorted = arr.clone();
+        Arrays.sort(sorted);
+        Map<Integer,Integer> map = new HashMap<>();
+        int idx = 0;
+        for (int v : sorted) {
+            if (!map.containsKey(v)) {
+                map.put(v, idx++);
+            }
+        }
+        int[] res = new int[n];
+        for (int i = 0; i < n; i++) {
+            res[i] = map.get(arr[i]);
+        }
+        return res;
+    }
+}
