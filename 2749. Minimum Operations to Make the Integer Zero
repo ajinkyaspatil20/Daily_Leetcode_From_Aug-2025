@@ -1,0 +1,16 @@
+class Solution {
+    public int makeTheIntegerZero(int num1, int num2) {
+        for (int k = 1; k <= 60; k++) {
+            long diff = (long) num1 - (long) k * num2; // use long to avoid overflow
+            if (diff < 0) continue; // must be non-negative
+            
+            // count bits (number of 1's in binary form)
+            int bitCount = Long.bitCount(diff);
+            
+            if (bitCount <= k && k <= diff) {
+                return k;
+            }
+        }
+        return -1;
+    }
+}
