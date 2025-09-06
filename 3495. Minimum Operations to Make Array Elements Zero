@@ -1,0 +1,28 @@
+class Solution {
+    public long minOperations(int[][] queries) {
+        long total = 0;
+        for (int[] q : queries) {
+            total += solve(q[0], q[1]);
+        }
+        return total;
+    }
+
+    private long solve(int l, int r) {
+        long sum = 0;
+        int k = 1;
+        long start = 1, end = 3; 
+
+        while (start <= r) {
+            long left = Math.max(l, start);
+            long right = Math.min(r, end);
+            if (left <= right) {
+                long count = right - left + 1;
+                sum += count * k;
+            }
+            k++;
+            start *= 4;
+            end = end * 4 + 3;
+        }
+        return (sum + 1) / 2; 
+    }
+}
