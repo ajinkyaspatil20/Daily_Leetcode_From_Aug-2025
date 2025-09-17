@@ -1,0 +1,40 @@
+import java.util.*;
+
+class FoodRatings {
+    static class Food implements Comparable<Food> {
+        String name, cuisine;
+        int rating;
+        Food(String n, String c, int r) {
+            name = n; cuisine = c; rating = r;
+        }
+        public int compareTo(Food o) {
+            if (rating != o.rating) return o.rating - rating;
+            return name.compareTo(o.name);
+        }
+    }
+
+    Map<String, Food> foodMap;
+    Map<String, TreeSet<Food>> cuisineMap;
+
+    public FoodRatings(String[] foods, String[] cuisines, int[] ratings) {
+        foodMap = new HashMap<>();
+        cuisineMap = new HashMap<>();
+        for (int i = 0; i < foods.length; i++) {
+            Food f = new Food(foods[i], cuisines[i], ratings[i]);
+            foodMap.put(foods[i], f);
+            cuisineMap.computeIfAbsent(cuisines[i], k -> new TreeSet<>()).add(f);
+        }
+    }
+
+    public void changeRating(String food, int newRating) {
+        Food f = foodMap.get(food);
+        TreeSet<Food> set = cuisineMap.get(f.cuisine);
+        set.remove(f);
+        f.rating = newRating;
+        set.add(f);
+    }
+
+    public String highestRated(String cuisine) {
+        return cuisineMap.get(cuisine).first().name;
+    }
+}
