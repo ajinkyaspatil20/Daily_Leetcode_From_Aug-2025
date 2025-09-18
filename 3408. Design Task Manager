@@ -1,0 +1,56 @@
+import java.util.*;
+
+class TaskManager {
+    private static class Task {
+        int userId, taskId, priority;
+        Task(int u, int t, int p) {
+            userId = u;
+            taskId = t;
+            priority = p;
+        }
+    }
+
+    private Map<Integer, int[]> taskInfo;
+    private PriorityQueue<Task> maxHeap;
+
+    public TaskManager(List<List<Integer>> tasks) {
+        taskInfo = new HashMap<>();
+        maxHeap = new PriorityQueue<>((a, b) -> {
+            if (a.priority != b.priority) return Integer.compare(b.priority, a.priority);
+            return Integer.compare(b.taskId, a.taskId);
+        });
+        if (tasks != null) {
+            for (List<Integer> t : tasks) {
+                add(t.get(0), t.get(1), t.get(2));
+            }
+        }
+    }
+
+    public void add(int userId, int taskId, int priority) {
+        taskInfo.put(taskId, new int[]{userId, priority});
+        maxHeap.offer(new Task(userId, taskId, priority));
+    }
+
+    public void edit(int taskId, int newPriority) {
+        int[] info = taskInfo.get(taskId);
+        if (info == null) return;
+        info[1] = newPriority;
+        maxHeap.offer(new Task(info[0], taskId, newPriority));
+    }
+
+    public void rmv(int taskId) {
+        taskInfo.remove(taskId);
+    }
+
+    public int execTop() {
+        while (!maxHeap.isEmpty()) {
+            Task top = maxHeap.poll();
+            int[] info = taskInfo.get(top.taskId);
+            if (info == null) continue;
+            if (info[1] != top.priority) continue;
+            taskInfo.remove(top.taskId);
+            return info[0];
+        }
+        return -1;
+    }
+}
