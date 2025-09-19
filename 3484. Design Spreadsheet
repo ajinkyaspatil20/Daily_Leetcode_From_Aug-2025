@@ -1,0 +1,35 @@
+import java.util.*;
+
+class Spreadsheet {
+    private Map<String, Integer> cells;
+
+    public Spreadsheet(int rows) {
+        cells = new HashMap<>();
+    }
+    
+    public void setCell(String cell, int value) {
+        cells.put(cell, value);
+    }
+    
+    public void resetCell(String cell) {
+        cells.put(cell, 0);
+    }
+    
+    public int getValue(String formula) {
+        // Remove "="
+        formula = formula.substring(1);
+        String[] parts = formula.split("\\+");
+        int sum = 0;
+
+        for (String part : parts) {
+            if (Character.isDigit(part.charAt(0))) {
+                // It's a number
+                sum += Integer.parseInt(part);
+            } else {
+                // It's a cell reference
+                sum += cells.getOrDefault(part, 0);
+            }
+        }
+        return sum;
+    }
+}
