@@ -1,0 +1,82 @@
+import java.util.*;
+
+class Router {
+    private int memoryLimit;
+    private Queue<int[]> queue;
+    private Set<String> packetSet;
+    private Map<Integer, TreeMap<Integer, Integer>> destPrefix; 
+    public Router(int memoryLimit) {
+        this.memoryLimit = memoryLimit;
+        this.queue = new LinkedList<>();
+        this.packetSet = new HashSet<>();
+        this.destPrefix = new HashMap<>();
+    }
+
+    public boolean addPacket(int source, int destination, int timestamp) {
+        String key = source + "|" + destination + "|" + timestamp;
+        if (packetSet.contains(key)) return false; // duplicate
+
+        // Evict oldest if memory full
+        if (queue.size() == memoryLimit) {
+            int[] old = queue.poll();
+            String oldKey = old[0] + "|" + old[1] + "|" + old[2];
+            packetSet.remove(oldKey);
+            removeFromPrefix(old[1], old[2]);
+        }
+
+       
+        queue.offer(new int[]{source, destination, timestamp});
+        packetSet.add(key);
+        addToPrefix(destination, timestamp);
+        return true;
+    }
+
+    public int[] forwardPacket() {
+        if (queue.isEmpty()) return new int[0];
+        int[] packet = queue.poll();
+        String key = packet[0] + "|" + packet[1] + "|" + packet[2];
+        packetSet.remove(key);
+        removeFromPrefix(packet[1], packet[2]);
+        return packet;
+    }
+
+    public int getCount(int destination, int startTime, int endTime) {
+        if (!destPrefix.containsKey(destination)) return 0;
+        TreeMap<Integer, Integer> prefix = destPrefix.get(destination);
+
+        Integer endKey = prefix.floorKey(endTime);
+        if (endKey == null) return 0;
+        int endCount = prefix.get(endKey);
+
+        Integer startKey = prefix.floorKey(startTime - 1);
+        int startCount = (startKey == null ? 0 : prefix.get(startKey));
+
+        return endCount - startCount;
+    }
+
+    
+    private void addToPrefix(int destination, int timestamp) {
+        destPrefix.putIfAbsent(destination, new TreeMap<>());
+        TreeMap<Integer, Integer> prefix = destPrefix.get(destination);
+
+        int prev = 0;
+        Integer floor = prefix.floorKey(timestamp);
+        if (floor != null) prev = prefix.get(floor);
+
+        prefix.put(timestamp, prev + 1);
+    }
+
+    private void removeFromPrefix(int destination, int timestamp) {
+        TreeMap<Integer, Integer> prefix = destPrefix.get(destination);
+        if (prefix == null) return;
+
+        
+        NavigableMap<Integer, Integer> tail = prefix.tailMap(timestamp, true);
+        for (Map.Entry<Integer, Integer> e : tail.entrySet()) {
+            prefix.put(e.getKey(), e.getValue() - 1);
+        }
+        if (prefix.get(timestamp) != null && prefix.get(timestamp) == 0) {
+            prefix.remove(timestamp);
+        }
+    }
+}
