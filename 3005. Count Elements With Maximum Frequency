@@ -1,0 +1,10 @@
+class Solution {
+    public int maxFrequencyElements(int[] nums) {
+        int[] freq = new int[101];
+        int max = 0, res = 0;
+        for (int n : nums) freq[n]++;
+        for (int f : freq) max = Math.max(max, f);
+        for (int f : freq) if (f == max) res += f;
+        return res;
+    }
+}
