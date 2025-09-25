@@ -1,0 +1,16 @@
+class Solution {
+    public int minimumTotal(List<List<Integer>> triangle) {
+        
+        for (int i = triangle.size() - 2; i >= 0; i--) {
+            List<Integer> currentRow = triangle.get(i);
+            List<Integer> nextRow = triangle.get(i + 1);
+            
+            for (int j = 0; j < currentRow.size(); j++) {
+                int minPath = Math.min(nextRow.get(j), nextRow.get(j + 1));
+                currentRow.set(j, currentRow.get(j) + minPath);
+            }
+        }
+        
+        return triangle.get(0).get(0);
+    }
+}
