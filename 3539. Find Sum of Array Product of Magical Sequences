@@ -1,0 +1,71 @@
+import java.util.*;
+
+class Solution {
+    static final int MOD = 1000000007;
+
+    public int magicalSum(int m, int k, int[] nums) {
+        int n = nums.length;
+        long[] fact = new long[m + 1];
+        long[] invFact = new long[m + 1];
+        fact[0] = 1;
+        for (int i = 1; i <= m; i++) fact[i] = fact[i - 1] * i % MOD;
+        invFact[m] = modPow(fact[m], MOD - 2);
+        for (int i = m - 1; i >= 0; i--) invFact[i] = invFact[i + 1] * (i + 1) % MOD;
+
+        long[][] pow = new long[n][m + 1];
+        for (int i = 0; i < n; i++) {
+            pow[i][0] = 1;
+            for (int c = 1; c <= m; c++) pow[i][c] = pow[i][c - 1] * nums[i] % MOD;
+        }
+
+        long[][][] dp = new long[m + 1][m + 1][m + 1];
+        dp[0][0][0] = 1;
+        for (int i = 0; i < n; i++) {
+            long[][][] nxt = new long[m + 1][m + 1][m + 1];
+            for (int t = 0; t <= m; t++) {
+                for (int carry = 0; carry <= m; carry++) {
+                    for (int sb = 0; sb <= m; sb++) {
+                        long cur = dp[t][carry][sb];
+                        if (cur == 0) continue;
+                        int maxC = m - t;
+                        for (int c = 0; c <= maxC; c++) {
+                            int nt = t + c;
+                            int sum = carry + c;
+                            int bit = sum & 1;
+                            int nc = sum >> 1;
+                            int nsb = sb + bit;
+                            long add = cur * pow[i][c] % MOD * invFact[c] % MOD;
+                            nxt[nt][nc][nsb] += add;
+                            if (nxt[nt][nc][nsb] >= MOD) nxt[nt][nc][nsb] -= MOD;
+                        }
+                    }
+                }
+            }
+            dp = nxt;
+        }
+
+        long ans = 0;
+        for (int carry = 0; carry <= m; carry++) {
+            for (int sb = 0; sb <= m; sb++) {
+                long cur = dp[m][carry][sb];
+                if (cur == 0) continue;
+                int finalBits = sb + Integer.bitCount(carry);
+                if (finalBits == k) {
+                    ans = (ans + cur) % MOD;
+                }
+            }
+        }
+        ans = ans * fact[m] % MOD;
+        return (int) ans;
+    }
+
+    private long modPow(long a, long e) {
+        long r = 1;
+        while (e > 0) {
+            if ((e & 1) == 1) r = r * a % MOD;
+            a = a * a % MOD;
+            e >>= 1;
+        }
+        return r;
+    }
+}
