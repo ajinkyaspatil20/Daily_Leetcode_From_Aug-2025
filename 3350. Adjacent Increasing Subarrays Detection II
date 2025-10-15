@@ -1,0 +1,23 @@
+import java.util.*;
+
+class Solution {
+    public int maxIncreasingSubarrays(List<Integer> nums) {
+        int n = nums.size();
+        int[] f = new int[n];
+        f[n - 1] = 1;
+        for (int i = n - 2; i >= 0; i--) {
+            if (nums.get(i) < nums.get(i + 1)) f[i] = f[i + 1] + 1;
+            else f[i] = 1;
+        }
+        int lo = 0, hi = n / 2;
+        while (lo < hi) {
+            int mid = (hi + lo + 1) / 2;
+            boolean ok = false;
+            for (int a = 0; a + 2 * mid <= n; a++) {
+                if (f[a] >= mid && f[a + mid] >= mid) { ok = true; break; }
+            }
+            if (ok) lo = mid; else hi = mid - 1;
+        }
+        return lo;
+    }
+}
