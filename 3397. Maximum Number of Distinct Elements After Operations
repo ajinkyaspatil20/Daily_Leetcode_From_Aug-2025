@@ -1,0 +1,19 @@
+import java.util.*;
+
+class Solution {
+    public int maxDistinctElements(int[] nums, int k) {
+        Arrays.sort(nums);
+        int count = 0;
+        long last = Long.MIN_VALUE;
+        for (int num : nums) {
+            long low = num - k;
+            long high = num + k;
+            long val = Math.max(low, last + 1);
+            if (val <= high) {
+                count++;
+                last = val;
+            }
+        }
+        return count;
+    }
+}
