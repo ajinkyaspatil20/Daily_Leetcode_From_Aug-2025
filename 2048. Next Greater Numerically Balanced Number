@@ -1,0 +1,12 @@
+class Solution {
+    public int nextBeautifulNumber(int n) {
+        for (int i = n + 1; ; i++) if (isBalanced(i)) return i;
+    }
+    private boolean isBalanced(int x) {
+        int[] cnt = new int[10];
+        int t = x;
+        while (t > 0) { cnt[t % 10]++; t /= 10; }
+        for (int d = 0; d <= 9; d++) if (cnt[d] > 0 && cnt[d] != d) return false;
+        return true;
+    }
+}
