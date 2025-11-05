@@ -1,0 +1,159 @@
+import java.util.*;
+
+public class Solution {
+    
+    static class FreqValue {
+        int freq;
+        int val;
+        FreqValue(int f, int v) { freq = f; val = v; }
+    }
+
+    
+    static class FreqComparator implements Comparator<FreqValue> {
+        public int compare(FreqValue a, FreqValue b) {
+            if (a.freq != b.freq) return b.freq - a.freq;
+            if (a.val != b.val) return b.val - a.val;
+            return 0; 
+        }
+    }
+
+    private Map<Integer, Integer> freq;        
+    private Map<Integer, FreqValue> mapRef;     
+    private TreeSet<FreqValue> topX;
+    private TreeSet<FreqValue> rest;
+    private long sumTopX;
+    private int X;
+
+    public Solution() {
+        freq = new HashMap<>();
+        mapRef = new HashMap<>();
+        topX = new TreeSet<>(new FreqComparator());
+        rest = new TreeSet<>(new FreqComparator());
+        sumTopX = 0;
+    }
+
+    private void balance() {
+       
+        while (topX.size() < X && !rest.isEmpty()) {
+            FreqValue best = rest.pollFirst();
+            topX.add(best);
+            sumTopX += (long) best.freq * best.val;
+        }
+
+        
+        while (topX.size() > X) {
+            FreqValue worst = topX.pollLast();
+            rest.add(worst);
+            sumTopX -= (long) worst.freq * worst.val;
+        }
+
+        
+        while (!topX.isEmpty() && !rest.isEmpty()) {
+            FreqValue worstTop = topX.last();
+            FreqValue bestRest = rest.first();
+            
+            int cmpFreq = Integer.compare(bestRest.freq, worstTop.freq);
+            if (bestRest.freq > worstTop.freq || (bestRest.freq == worstTop.freq && bestRest.val > worstTop.val)) {
+                
+                topX.remove(worstTop);
+                rest.remove(bestRest);
+
+                sumTopX -= (long) worstTop.freq * worstTop.val;
+                sumTopX += (long) bestRest.freq * bestRest.val;
+
+                topX.add(bestRest);
+                rest.add(worstTop);
+            } else break;
+        }
+    }
+
+    private void insertValue(int val) {
+        int oldF = freq.getOrDefault(val, 0);
+        int newF = oldF + 1;
+
+        if (oldF > 0) {
+            
+            FreqValue oldFV = mapRef.get(val);
+            
+            if (topX.remove(oldFV)) {
+                sumTopX -= (long) oldFV.freq * oldFV.val;
+            } else {
+                rest.remove(oldFV);
+            }
+        }
+
+        
+        freq.put(val, newF);
+        FreqValue newFV = new FreqValue(newF, val);
+        mapRef.put(val, newFV);
+        
+        rest.add(newFV);
+        balance();
+    }
+
+    private void removeValue(int val) {
+        int oldF = freq.getOrDefault(val, 0);
+        if (oldF == 0) return; 
+        int newF = oldF - 1;
+
+        FreqValue oldFV = mapRef.get(val);
+        if (topX.remove(oldFV)) {
+            sumTopX -= (long) oldFV.freq * oldFV.val;
+        } else {
+            rest.remove(oldFV);
+        }
+
+        if (newF == 0) {
+            freq.remove(val);
+            mapRef.remove(val);
+        } else {
+            freq.put(val, newF);
+            FreqValue newFV = new FreqValue(newF, val);
+            mapRef.put(val, newFV);
+            rest.add(newFV);
+        }
+
+        balance();
+    }
+
+    public long[] findXSum(int[] nums, int k, int x) {
+        int n = nums.length;
+        if (n == 0) return new long[0];
+        X = x;
+
+        
+        freq.clear();
+        mapRef.clear();
+        topX.clear();
+        rest.clear();
+        sumTopX = 0;
+
+        long[] ans = new long[n - k + 1];
+
+        
+        for (int i = 0; i < k; i++) {
+            insertValue(nums[i]);
+        }
+        ans[0] = sumTopX;
+
+        
+        for (int i = k; i < n; i++) {
+            removeValue(nums[i - k]);
+            insertValue(nums[i]);
+            ans[i - k + 1] = sumTopX;
+        }
+        return ans;
+    }
+
+    
+    public static void main(String[] args) {
+        Solution sol = new Solution();
+        int[] nums1 = {1,1,2,2,3,4,2,3};
+        int k1 = 6, x1 = 2;
+        System.out.println(Arrays.toString(sol.findXSum(nums1, k1, x1))); 
+
+        int[] nums2 = {3,8,7,8,7,5};
+        int k2 = 2, x2 = 2;
+        System.out.println(Arrays.toString(sol.findXSum(nums2, k2, x2))); 
+    }
+}
