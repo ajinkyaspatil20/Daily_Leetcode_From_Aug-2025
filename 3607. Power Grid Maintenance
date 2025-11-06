@@ -1,0 +1,63 @@
+import java.util.*;
+
+class Solution {
+    public int[] processQueries(int c, int[][] connections, int[][] queries) {
+        List<Integer>[] graph = new ArrayList[c + 1];
+        for (int i = 1; i <= c; i++) graph[i] = new ArrayList<>();
+        for (int[] e : connections) {
+            graph[e[0]].add(e[1]);
+            graph[e[1]].add(e[0]);
+        }
+
+        boolean[] visited = new boolean[c + 1];
+        int[] comp = new int[c + 1];
+        int compId = 0;
+        for (int i = 1; i <= c; i++) {
+            if (!visited[i]) {
+                compId++;
+                Queue<Integer> q = new LinkedList<>();
+                q.add(i);
+                visited[i] = true;
+                comp[i] = compId;
+                while (!q.isEmpty()) {
+                    int u = q.poll();
+                    for (int v : graph[u]) {
+                        if (!visited[v]) {
+                            visited[v] = true;
+                            comp[v] = compId;
+                            q.add(v);
+                        }
+                    }
+                }
+            }
+        }
+
+        TreeSet<Integer>[] online = new TreeSet[compId + 1];
+        for (int i = 1; i <= compId; i++) online[i] = new TreeSet<>();
+        for (int i = 1; i <= c; i++) online[comp[i]].add(i);
+
+        boolean[] off = new boolean[c + 1];
+        List<Integer> res = new ArrayList<>();
+
+        for (int[] q : queries) {
+            int t = q[0], x = q[1];
+            if (t == 1) {
+                if (!off[x]) res.add(x);
+                else {
+                    TreeSet<Integer> set = online[comp[x]];
+                    if (set.isEmpty()) res.add(-1);
+                    else res.add(set.first());
+                }
+            } else {
+                if (!off[x]) {
+                    off[x] = true;
+                    online[comp[x]].remove(x);
+                }
+            }
+        }
+
+        int[] ans = new int[res.size()];
+        for (int i = 0; i < res.size(); i++) ans[i] = res.get(i);
+        return ans;
+    }
+}
