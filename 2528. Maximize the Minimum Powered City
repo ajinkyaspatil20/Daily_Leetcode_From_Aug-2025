@@ -1,0 +1,39 @@
+class Solution {
+    public long maxPower(int[] stations, int r, int k) {
+        int n = stations.length;
+        long[] prefix = new long[n + 1];
+        for (int i = 0; i < n; i++) prefix[i + 1] = prefix[i] + stations[i];
+        long totalStations = prefix[n];
+        long left = 0, right = totalStations + k, ans = 0;
+        while (left <= right) {
+            long mid = (left + right) >>> 1;
+            if (canAchieve(mid, stations, r, k, prefix)) {
+                ans = mid;
+                left = mid + 1;
+            } else right = mid - 1;
+        }
+        return ans;
+    }
+
+    private boolean canAchieve(long target, int[] stations, int r, long k, long[] prefix) {
+        int n = stations.length;
+        long[] diff = new long[n + 1];
+        long windowAdd = 0;
+        for (int i = 0; i < n; i++) {
+            windowAdd += diff[i];
+            int left = Math.max(0, i - r);
+            int right = Math.min(n, i + r + 1);
+            long base = prefix[right] - prefix[left];
+            long total = base + windowAdd;
+            if (total < target) {
+                long need = target - total;
+                if (need > k) return false;
+                k -= need;
+                windowAdd += need;
+                int end = Math.min(n - 1, i + 2 * r);
+                diff[end + 1] -= need;
+            }
+        }
+        return true;
+    }
+}
