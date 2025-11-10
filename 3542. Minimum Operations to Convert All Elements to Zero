@@ -1,0 +1,15 @@
+class Solution {
+    public int minOperations(int[] nums) {
+        java.util.Deque<Integer> st = new java.util.ArrayDeque<>();
+        int ops = 0;
+        for (int x : nums) {
+            while (!st.isEmpty() && st.peek() > x) st.pop();
+            if (x > 0 && (st.isEmpty() || st.peek() < x)) {
+                st.push(x);
+                ops++;
+            }
+        }
+        return ops;
+    }
+}
+
