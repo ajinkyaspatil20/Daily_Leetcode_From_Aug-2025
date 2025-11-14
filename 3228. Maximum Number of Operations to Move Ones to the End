@@ -1,0 +1,20 @@
+class Solution {
+    public int maxOperations(String s) {
+        int ones = 0;
+        int ans = 0;
+        boolean inZeroBlock = false;
+
+        for (char c : s.toCharArray()) {
+            if (c == '1') {
+                ones++;
+                inZeroBlock = false;
+            } else {
+                if (!inZeroBlock && ones > 0) {
+                    ans += ones;
+                    inZeroBlock = true;
+                }
+            }
+        }
+        return ans;
+    }
+}
