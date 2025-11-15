@@ -1,0 +1,52 @@
+class Solution {
+    public int numberOfSubstrings(String s) {
+        int n = s.length();
+        int[] pref = new int[n + 1];
+        for (int i = 0; i < n; i++) pref[i + 1] = pref[i] + (s.charAt(i) == '1' ? 1 : 0);
+        java.util.ArrayList<Integer> zl = new java.util.ArrayList<>();
+        for (int i = 0; i < n; i++) if (s.charAt(i) == '0') zl.add(i);
+        int zc = zl.size();
+        int[] zeros = new int[zc];
+        for (int i = 0; i < zc; i++) zeros[i] = zl.get(i);
+        int maxZ = (int) Math.sqrt(n);
+        long ans = 0;
+        for (int l = 0; l < n; l++) {
+            int idx = lowerBound(zeros, zc, l);
+            for (int z = 0; z <= maxZ; z++) {
+                if (z >= 1 && idx + z - 1 >= zc) break;
+                int minR = (z == 0 ? l : zeros[idx + z - 1]);
+                int maxR = (z == 0 ?
+                        (idx < zc ? zeros[idx] - 1 : n - 1) :
+                        (idx + z < zc ? zeros[idx + z] - 1 : n - 1));
+                if (minR > maxR) continue;
+                int target = z * z;
+                int onesMin = pref[minR + 1] - pref[l];
+                if (onesMin >= target) {
+                    ans += (maxR - minR + 1);
+                    continue;
+                }
+                int onesMax = pref[maxR + 1] - pref[l];
+                if (onesMax < target) continue;
+                int lo = minR, hi = maxR;
+                while (lo < hi) {
+                    int mid = (lo + hi) >>> 1;
+                    int ones = pref[mid + 1] - pref[l];
+                    if (ones >= target) hi = mid;
+                    else lo = mid + 1;
+                }
+                ans += (maxR - lo + 1);
+            }
+        }
+        return (int) ans;
+    }
+
+    private int lowerBound(int[] arr, int len, int target) {
+        int lo = 0, hi = len;
+        while (lo < hi) {
+            int mid = (lo + hi) >>> 1;
+            if (arr[mid] < target) lo = mid + 1;
+            else hi = mid;
+        }
+        return lo;
+    }
+}
