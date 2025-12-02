@@ -1,0 +1,26 @@
+class Solution {
+    static final long MOD = 1_000_000_007;
+
+    public int countTrapezoids(int[][] points) {
+        java.util.Map<Integer, Integer> map = new java.util.HashMap<>();
+        for (int[] p : points) {
+            map.put(p[1], map.getOrDefault(p[1], 0) + 1);
+        }
+
+        long sum = 0;
+        long sqSum = 0;
+
+        for (int c : map.values()) {
+            if (c >= 2) {
+                long v = (long)c * (c - 1) / 2;
+                sum = (sum + v) % MOD;
+                sqSum = (sqSum + (v * v) % MOD) % MOD;
+            }
+        }
+
+        long ans = (sum * sum % MOD - sqSum + MOD) % MOD;
+        ans = ans * ((MOD + 1) / 2) % MOD;
+
+        return (int) ans;
+    }
+}
